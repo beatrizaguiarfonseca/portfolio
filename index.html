@@ -5,6 +5,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Beatriz Fonseca — Portfolio</title>
+  <meta name="description" content="Beatriz Aguiar Fonseca: brand, social, and creative strategist. Apple's first-ever Social Strategy Intern. Northwestern University.">
+  <script>
+    /* Show the lock-screen intro once per browser session (skips when coming back from a project page) */
+    (function(){
+      var seen=false;
+      try{seen=sessionStorage.getItem('bea_intro_seen')==='1';}catch(e){}
+      if(!seen) document.documentElement.classList.add('intro-on');
+    })();
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -14,195 +23,219 @@
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
     html{scroll-behavior:smooth;}
     body{font-family:var(--sans);background:var(--white);color:var(--black);overflow-x:hidden;}
+    html.intro-on,html.intro-on body{overflow:hidden;}
+
+    /* ═══════════════════════════════════
+       INTRO: iPhone lock screen + notification
+    ═══════════════════════════════════ */
+    .intro{display:none;position:fixed;inset:0;z-index:1000;background:#fff;flex-direction:column;align-items:center;cursor:default;-webkit-user-select:none;user-select:none;}
+    html.intro-on .intro{display:flex;}
+    .intro.is-leaving{opacity:0;transition:opacity .5s ease .35s;pointer-events:none;}
+    .ls-top{margin-top:clamp(3rem,9vh,6rem);text-align:center;opacity:0;transform:translateY(-8px);animation:lsIn .9s cubic-bezier(.22,1,.36,1) .15s forwards;}
+    .ls-date{font-size:clamp(0.95rem,1.6vw,1.15rem);font-weight:600;color:#3a3a3a;letter-spacing:0.01em;}
+    .ls-time{font-size:clamp(5.5rem,15vw,9.5rem);font-weight:700;letter-spacing:-0.045em;line-height:0.95;color:#111;margin-top:0.15rem;font-variant-numeric:tabular-nums;}
+    @keyframes lsIn{to{opacity:1;transform:none;}}
+
+    .notif{
+      margin-top:clamp(2rem,5vh,3rem);
+      width:min(400px,92vw);
+      display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:center;
+      padding:13px 15px;border-radius:24px;
+      background:rgba(236,236,238,0.82);backdrop-filter:blur(24px) saturate(1.6);-webkit-backdrop-filter:blur(24px) saturate(1.6);
+      box-shadow:0 18px 50px rgba(0,0,0,0.14),0 2px 6px rgba(0,0,0,0.06);
+      border:none;font:inherit;text-align:left;color:inherit;cursor:pointer;
+      opacity:0;transform:translateY(-120vh) scale(.9);
+      transition:transform .2s ease,box-shadow .2s ease;
+    }
+    .notif.is-in{animation:notifDrop .85s cubic-bezier(.2,1.25,.35,1) forwards, notifBuzz .5s ease .95s 1;}
+    @keyframes notifDrop{0%{opacity:0;transform:translateY(-55vh) scale(.92);}60%{opacity:1;}100%{opacity:1;transform:translateY(0) scale(1);}}
+    @keyframes notifBuzz{0%,100%{translate:0 0;}20%{translate:-4px 0;}40%{translate:4px 0;}60%{translate:-3px 0;}80%{translate:2px 0;}}
+    .notif:hover{box-shadow:0 22px 60px rgba(0,0,0,0.18),0 2px 6px rgba(0,0,0,0.06);}
+    .notif:active{transform:scale(.97)!important;}
+    .notif:focus-visible{outline:3px solid var(--orange);outline-offset:4px;}
+    .n-av{position:relative;width:42px;height:42px;flex-shrink:0;}
+    .n-av img.face{width:42px;height:42px;border-radius:50%;object-fit:cover;object-position:top;display:block;}
+    .n-badge{position:absolute;right:-4px;bottom:-4px;width:19px;height:19px;border-radius:5px;background:#fff;box-shadow:0 0 0 2px rgba(236,236,238,1);overflow:hidden;display:flex;align-items:center;justify-content:center;}
+    .n-badge img{width:100%;height:100%;object-fit:contain;}
+    .n-row{display:flex;justify-content:space-between;align-items:baseline;gap:8px;}
+    .n-title{font-size:0.93rem;font-weight:700;color:#111;}
+    .n-app{font-size:0.7rem;font-weight:600;color:#7a7a7e;letter-spacing:0.01em;}
+    .n-time{font-size:0.75rem;color:#7a7a7e;flex-shrink:0;}
+    .n-body{font-size:0.88rem;line-height:1.38;color:#1b1b1b;margin-top:1px;}
+
+    .ls-hint{margin-top:1.4rem;font-size:0.72rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#a7a7a7;opacity:0;transition:opacity .6s ease;display:flex;align-items:center;gap:7px;}
+    .ls-hint.show{opacity:1;animation:hintPulse 2.2s ease-in-out 0.6s infinite;}
+    @keyframes hintPulse{0%,100%{opacity:1}50%{opacity:.35}}
+    .ls-bottom{position:absolute;bottom:clamp(1.5rem,4vh,2.5rem);left:0;right:0;display:flex;flex-direction:column;align-items:center;gap:1.1rem;}
+    .ls-bar{width:134px;height:5px;border-radius:3px;background:#111;opacity:.85;}
+    .ls-skip{background:none;border:none;font:inherit;font-size:0.72rem;font-weight:700;color:#b5b5b5;cursor:pointer;letter-spacing:0.08em;text-transform:uppercase;}
+    .ls-skip:hover{color:var(--orange);}
+
+    /* "app launch" expansion from the notification */
+    .launch{position:fixed;z-index:1001;background:var(--orange);border-radius:24px;pointer-events:none;
+      transition:top .5s cubic-bezier(.7,0,.25,1),left .5s cubic-bezier(.7,0,.25,1),width .5s cubic-bezier(.7,0,.25,1),height .5s cubic-bezier(.7,0,.25,1),border-radius .5s cubic-bezier(.7,0,.25,1),opacity .45s ease;}
+    .launch.full{top:0!important;left:0!important;width:100vw!important;height:100vh!important;border-radius:0;}
+    .launch.fade{opacity:0;}
+
+    /* page reveal */
+    .site{transform-origin:50% 30vh;}
+    html.intro-on .site{transform:scale(.94);filter:blur(6px);}
+    .site.revealing{transition:transform .9s cubic-bezier(.22,1,.36,1),filter .9s ease;transform:none!important;filter:none!important;}
 
     /* ── NAV ── */
     nav{position:fixed;top:0;left:0;width:100%;z-index:300;background:rgba(255,255,255,0.92);backdrop-filter:blur(14px);border-bottom:1px solid rgba(0,0,0,0.05);}
     .nav-inner{max-width:1280px;margin:0 auto;padding:0 2.5rem;height:58px;display:flex;align-items:center;justify-content:space-between;}
     .nav-logo{font-family:var(--sans);font-weight:800;font-size:0.78rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--black);text-decoration:none;display:flex;align-items:center;gap:9px;}
     .nav-logo img{height:26px;width:26px;object-fit:contain;border-radius:4px;}
-    .nav-logo .ndot{width:6px;height:6px;border-radius:50%;background:var(--orange);flex-shrink:0;}
     .nav-links{display:flex;gap:2.5rem;align-items:center;}
     .nav-links a{font-size:0.82rem;font-weight:600;letter-spacing:0.04em;color:var(--gray);text-decoration:none;transition:color 0.2s;}
     .nav-links a:hover{color:var(--black);}
+    .nav-links a.nav-apple{color:var(--orange);font-weight:800;display:inline-flex;align-items:center;gap:6px;}
     .nav-cta{background:var(--black);color:var(--white)!important;padding:7px 18px;border-radius:999px;font-size:0.78rem!important;transition:background 0.2s!important;}
     .nav-cta:hover{background:var(--orange)!important;}
-    /* mobile nav */
     .nav-hamburger{display:none;background:none;border:none;cursor:pointer;padding:6px;color:var(--black);}
     .nav-mobile{display:none;position:fixed;top:58px;left:0;right:0;background:rgba(255,255,255,0.97);backdrop-filter:blur(14px);border-bottom:1px solid rgba(0,0,0,0.08);padding:1.25rem 2rem 1.5rem;z-index:299;flex-direction:column;gap:1rem;}
     .nav-mobile.open{display:flex;}
     .nav-mobile a{font-size:0.9rem;font-weight:700;color:var(--gray);text-decoration:none;padding:0.5rem 0;border-bottom:1px solid rgba(0,0,0,0.05);}
     .nav-mobile a:last-child{border-bottom:none;}
-    @media(max-width:640px){.nav-links{display:none;}.nav-hamburger{display:flex;align-items:center;justify-content:center;}}
+    @media(max-width:760px){.nav-links{display:none;}.nav-hamburger{display:flex;align-items:center;justify-content:center;}}
 
     /* ── BUTTONS ── */
     .btn-fill{background:var(--black);color:var(--white);padding:0.8rem 2rem;border-radius:999px;font-size:0.85rem;font-weight:700;letter-spacing:0.02em;text-decoration:none;display:inline-flex;align-items:center;gap:7px;transition:all 0.22s;font-family:var(--sans);}
     .btn-fill:hover{background:var(--orange);transform:translateY(-2px);}
+    .btn-orange{background:var(--orange);color:#fff;}
+    .btn-orange:hover{background:var(--black);}
     .btn-outline{background:transparent;color:var(--black);border:1.5px solid rgba(0,0,0,0.18);padding:0.8rem 2rem;border-radius:999px;font-size:0.85rem;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:7px;transition:all 0.22s;font-family:var(--sans);}
     .btn-outline:hover{border-color:var(--orange);color:var(--orange);transform:translateY(-2px);}
 
     @keyframes fUp{to{opacity:1;transform:translateY(0);}}
     @keyframes bPulse{0%,100%{opacity:1}50%{opacity:0.3}}
-    @keyframes sBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}
+    @keyframes floatB{0%,100%{transform:translateY(0);}50%{transform:translateY(-12px);}}
+
+    .reveal{opacity:0;transform:translateY(24px);transition:opacity .7s ease,transform .7s ease;}
+    .reveal.in{opacity:1;transform:none;}
 
     /* ═══════════════════════════════════
-       SCROLLYTELLING HERO
+       HERO
     ═══════════════════════════════════ */
-    #hero-scroll{position:relative;height:500vh;background:#fff;}
-    #hero-sticky{
-      position:sticky;top:0;height:100vh;
-      display:flex;align-items:center;justify-content:center;
-      overflow:hidden;
-    }
+    .hero{min-height:100vh;padding:58px 2.5rem 0;display:flex;align-items:center;position:relative;overflow:hidden;
+      background:radial-gradient(ellipse 45% 55% at 78% 50%,rgba(255,107,53,0.10),transparent 70%),#fff;}
+    .hero-stage{width:100%;max-width:1160px;margin:0 auto;display:grid;grid-template-columns:1.1fr 0.9fr;gap:4rem;align-items:center;padding:3rem 0;}
+    .hero-text > *{opacity:0;transform:translateY(18px);}
+    .ready .hero-text > *{animation:fUp .8s cubic-bezier(.22,1,.36,1) forwards;}
+    .ready .hero-text > *:nth-child(2){animation-delay:.08s;}
+    .ready .hero-text > *:nth-child(3){animation-delay:.16s;}
+    .ready .hero-text > *:nth-child(4){animation-delay:.24s;}
+    .ready .hero-text > *:nth-child(5){animation-delay:.32s;}
 
-    /* Centered stage — two columns, both pushed toward center */
-    .hero-stage{
-      width:100%;max-width:1160px;margin:0 auto;
-      padding:0 3rem;padding-top:58px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:5rem;
-    }
-
-    /* ── TEXT COL: right-aligned text ── */
-    .hero-text-col{
-      flex:1;
-      position:relative;
-      min-height:480px;
-      display:flex;
-      align-items:center;
-      /* text aligns right toward the phone */
-      /* we keep left align for readability but push col to the right */
-    }
-    .txt-panel{
-      position:absolute;inset:0;
-      display:flex;flex-direction:column;justify-content:center;
-      opacity:0;transform:translateY(18px);
-      transition:opacity .65s cubic-bezier(.22,1,.36,1),transform .65s cubic-bezier(.22,1,.36,1);
-      pointer-events:none;
-    }
-    .txt-panel.is-active{opacity:1;transform:translateY(0);pointer-events:auto;position:relative;}
-    .txt-panel.is-exit{opacity:0;transform:translateY(-14px);}
-
-    .hero-tag{display:inline-flex;align-items:center;gap:8px;font-size:0.68rem;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:var(--orange);background:var(--orange-soft);border:1px solid var(--orange-mid);padding:5px 14px;border-radius:999px;margin-bottom:2rem;width:fit-content;}
-    .hero-tag .pulse{width:6px;height:6px;border-radius:50%;background:var(--orange);animation:bPulse 2s ease-in-out infinite;}
-    .hero-h1{font-family:var(--serif);font-size:clamp(2.8rem,4.5vw,4.8rem);line-height:1.02;letter-spacing:-0.01em;color:var(--black);margin-bottom:0.5rem;}
+    .announce{display:inline-flex;align-items:center;gap:10px;text-decoration:none;color:var(--black);background:#fff;border:1px solid var(--orange-mid);border-radius:999px;padding:5px 14px 5px 5px;font-size:0.78rem;font-weight:600;margin-bottom:1.75rem;box-shadow:0 6px 20px rgba(255,107,53,0.12);transition:all .2s;width:fit-content;}
+    .announce:hover{border-color:var(--orange);transform:translateY(-2px);}
+    .announce b{background:var(--orange);color:#fff;font-size:0.62rem;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;padding:4px 10px;border-radius:999px;}
+    .announce i{color:var(--orange);}
+    .hero-h1{font-family:var(--serif);font-weight:400;font-size:clamp(3rem,5.2vw,5.2rem);line-height:1;letter-spacing:-0.015em;margin-bottom:1.25rem;}
     .hero-h1 em{font-style:italic;color:var(--orange);}
-    .hero-meta{margin:1.5rem 0 0.4rem;}
-    .hero-meta p{font-size:0.72rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#aaa;margin-bottom:4px;}
+    .hero-meta p{font-size:0.72rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#aaa;margin-bottom:5px;}
     .hero-meta p strong{color:var(--black);}
-    .hero-tagline{font-size:1rem;font-weight:400;line-height:1.7;color:var(--gray);max-width:420px;margin:1.5rem 0 2.5rem;}
+    .hero-meta a{color:var(--black);text-decoration:none;border-bottom:1.5px solid var(--orange);}
+    .hero-meta a:hover{color:var(--orange);}
+    .hero-tagline{font-size:1.05rem;line-height:1.7;color:var(--gray);max-width:440px;margin:1.5rem 0 2.25rem;}
     .hero-tagline em{font-style:italic;color:var(--black);font-weight:600;}
     .hero-btns{display:flex;gap:0.875rem;flex-wrap:wrap;}
-    .txt-kicker{font-size:0.68rem;font-weight:800;letter-spacing:0.18em;text-transform:uppercase;color:var(--orange);margin-bottom:1.25rem;display:flex;align-items:center;gap:10px;}
-    .txt-kicker::before{content:'';display:block;width:24px;height:2px;background:var(--orange);border-radius:1px;}
-    .txt-h{font-family:var(--serif);font-size:clamp(2.2rem,3.2vw,3.6rem);line-height:1.1;letter-spacing:-0.01em;color:var(--black);margin-bottom:1.5rem;}
-    .txt-h em{font-style:italic;color:var(--orange);}
-    .txt-body{font-size:0.97rem;color:var(--gray);line-height:1.75;max-width:420px;margin-bottom:2rem;}
-    .txt-body strong{color:var(--black);font-weight:700;}
-    .txt-pills{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:2rem;}
-    .txt-pill{font-size:0.72rem;font-weight:700;letter-spacing:0.04em;padding:5px 14px;border-radius:999px;background:var(--gray-light);color:var(--black);border:1.5px solid rgba(0,0,0,0.07);}
-    .txt-pill.orange{background:var(--orange-soft);color:var(--orange);border-color:var(--orange-mid);}
 
-    /* ── PHONE COL ── */
-    .hero-phone-col{flex-shrink:0;display:flex;align-items:center;justify-content:center;}
-    .sphone-outer{position:relative;width:265px;height:545px;background:#111;border:11px solid #111;border-radius:2.4rem;box-shadow:0 0 0 1px rgba(255,255,255,0.06),0 40px 80px rgba(0,0,0,0.22),0 8px 24px rgba(0,0,0,0.12);flex-shrink:0;}
+    /* Hero phone (profile) */
+    .hero-phone-col{display:flex;justify-content:center;opacity:0;transform:translateY(24px);}
+    .ready .hero-phone-col{animation:fUp 1s cubic-bezier(.22,1,.36,1) .2s forwards;}
+    .phone-float{position:relative;animation:floatB 7s ease-in-out infinite;}
+    .phone-glow{position:absolute;inset:-34px;background:radial-gradient(ellipse at center,rgba(255,107,53,0.16) 0%,transparent 70%);border-radius:3.5rem;pointer-events:none;z-index:-1;}
+    .sphone-outer{position:relative;width:265px;height:545px;background:#111;border:11px solid #111;border-radius:2.4rem;box-shadow:0 0 0 1px rgba(255,255,255,0.06),0 40px 80px rgba(0,0,0,0.22),0 8px 24px rgba(0,0,0,0.12);}
     .sphone-outer::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:110px;height:15px;background:#111;border-radius:0 0 10px 10px;z-index:30;}
-    .phone-glow{position:absolute;inset:-28px;background:radial-gradient(ellipse at center,rgba(255,107,53,0.12) 0%,transparent 70%);border-radius:3.5rem;pointer-events:none;z-index:-1;}
-    .pb{position:absolute;background:#1a1a1a;}
-    .pb-v1{left:-12px;top:64px;width:3px;height:26px;border-radius:3px 0 0 3px;}
-    .pb-v2{left:-12px;top:100px;width:3px;height:40px;border-radius:3px 0 0 3px;}
-    .pb-v3{left:-12px;top:148px;width:3px;height:40px;border-radius:3px 0 0 3px;}
-    .pb-pw{right:-12px;top:122px;width:3px;height:56px;border-radius:0 3px 3px 0;}
-    .sphone-screen{width:243px;height:523px;border-radius:2rem;overflow:hidden;position:relative;z-index:10;background:#000;}
-    .status-bar{position:absolute;top:0;left:0;right:0;z-index:30;display:flex;justify-content:space-between;align-items:center;padding:10px 17px 6px;font-size:10px;font-weight:700;color:#fff;transition:color 0.5s;}
+    .sphone-screen{width:243px;height:523px;border-radius:2rem;overflow:hidden;position:relative;background:linear-gradient(175deg,#111,#1a1a1a);display:flex;flex-direction:column;}
+    .status-bar{display:flex;justify-content:space-between;align-items:center;padding:10px 17px 0;font-size:10px;font-weight:700;color:#fff;}
     .si{display:flex;align-items:center;gap:4px;}
-    .ps{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;transform:scale(1.04);filter:blur(8px);pointer-events:none;transition:opacity .75s cubic-bezier(.22,1,.36,1),transform .75s cubic-bezier(.22,1,.36,1),filter .75s cubic-bezier(.22,1,.36,1);}
-    .ps.is-active{opacity:1;transform:scale(1);filter:blur(0);pointer-events:auto;}
-    .ps.is-exit{opacity:0;transform:scale(0.96);filter:blur(8px);}
-
-    /* TikTok */
-    #ss1{flex-direction:column;align-items:stretch;justify-content:flex-start;background:linear-gradient(175deg,#111,#1a1a1a);}
-    .tt-topbar{display:flex;align-items:center;justify-content:space-between;padding:28px 15px 6px;}
+    .tt-topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 15px 4px;}
     .tt-icon{color:#fff;font-size:17px;opacity:0.85;}
-    .tt-handle{font-family:var(--sans);font-size:11px;font-weight:700;color:#fff;}
     .tt-prof{padding:4px 15px 8px;display:flex;flex-direction:column;align-items:center;}
-    .tt-av{width:68px;height:68px;border-radius:50%;border:2.5px solid var(--orange);overflow:hidden;margin-bottom:7px;box-shadow:0 0 20px rgba(255,107,53,0.4);flex-shrink:0;}
+    .tt-av{width:68px;height:68px;border-radius:50%;border:2.5px solid var(--orange);overflow:hidden;margin-bottom:7px;box-shadow:0 0 20px rgba(255,107,53,0.4);}
     .tt-av img{width:100%;height:100%;object-fit:cover;object-position:top;}
-    .tt-name{font-family:var(--sans);font-size:13px;font-weight:800;color:#fff;margin-bottom:2px;}
-    .tt-uname{font-size:10px;font-weight:500;color:rgba(255,255,255,0.45);margin-bottom:7px;}
-    .tt-stats{display:flex;gap:18px;margin-bottom:7px;}
+    .tt-name{font-size:13px;font-weight:800;color:#fff;margin-bottom:7px;}
+    .tt-stats{display:flex;gap:18px;margin-bottom:8px;}
     .tt-stat{text-align:center;}
     .tt-snum{font-size:13px;font-weight:800;color:#fff;line-height:1;}
     .tt-slbl{font-size:8px;font-weight:600;color:rgba(255,255,255,0.4);margin-top:2px;text-transform:uppercase;letter-spacing:0.05em;}
-    .tt-bio{font-size:9.5px;color:rgba(255,255,255,0.65);text-align:center;line-height:1.55;margin-bottom:8px;max-width:200px;}
-    .tt-bio b{color:var(--orange);}
-    .tt-fbtn{background:var(--orange);color:#fff;border:none;border-radius:5px;font-size:11px;font-weight:800;font-family:var(--sans);padding:6px 38px;cursor:pointer;}
-    .tt-tabs{display:flex;border-bottom:1px solid rgba(255,255,255,0.08);}
+    .tt-fbtn{background:var(--orange);color:#fff;border:none;border-radius:5px;font-size:11px;font-weight:800;font-family:var(--sans);padding:6px 38px;text-decoration:none;}
+    .tt-tabs{display:flex;border-bottom:1px solid rgba(255,255,255,0.08);margin-top:4px;}
     .tt-tab{flex:1;text-align:center;padding:7px 0;font-size:9px;font-weight:700;color:rgba(255,255,255,0.38);text-transform:uppercase;letter-spacing:0.06em;position:relative;}
     .tt-tab.active{color:#fff;}
     .tt-tab.active::after{content:'';position:absolute;bottom:-1px;left:25%;width:50%;height:2px;background:#fff;border-radius:1px;}
-    .tt-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.5px;flex:1;overflow:hidden;}
-    .tt-thumb{aspect-ratio:9/14;overflow:hidden;position:relative;background:#222;}
-    .tt-thumb img{width:100%;height:100%;object-fit:cover;}
-    .tt-tov{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(to top,rgba(0,0,0,0.7),transparent);padding:6px 4px 3px;}
+    .tt-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.5px;flex:1;overflow:hidden;align-content:start;}
+    .tt-thumb{text-decoration:none;aspect-ratio:9/14;overflow:hidden;position:relative;background:#222;display:block;}
+    .tt-thumb img{width:100%;height:100%;object-fit:cover;transition:transform .4s;}
+    .tt-thumb:hover img{transform:scale(1.07);}
+    .tt-tov{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(to top,rgba(0,0,0,0.75),transparent);padding:8px 4px 3px;}
     .tt-views{font-size:7px;font-weight:700;color:#fff;}
-    /* Apple */
-    #ss2{background:#fff;padding:2rem;text-align:center;}
-    .a-logo{color:#000;margin-bottom:1.25rem;}
-    .s2-tag{display:block;font-size:9px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#6b7280;margin-bottom:0.75rem;}
-    .s2-title{font-size:16px;font-weight:800;line-height:1.3;color:#111;margin-bottom:0.75rem;font-family:var(--sans);}
-    .s2-city{font-size:12px;color:#6b7280;font-weight:600;}
-    .s2-date{font-size:10px;color:#9ca3af;margin-top:3px;}
-    .s2-btn{display:block;width:100%;margin-top:1.75rem;padding:.75rem 1.5rem;background:#0071e3;color:#fff;font-size:12px;font-weight:800;font-family:var(--sans);border:none;border-radius:9999px;cursor:pointer;transition:background .2s;}
-    .s2-btn:hover{background:#0077ed;}
-    /* Globe */
-    #ss3{background:#fff;justify-content:flex-start;align-items:stretch;padding:0;}
-    .g-header{position:relative;z-index:2;padding:3rem 1.5rem 0;text-align:center;}
-    .g-eye{display:flex;align-items:center;justify-content:center;gap:6px;color:#0071e3;margin-bottom:7px;}
-    .g-eye span{font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;}
-    .g-title{font-size:15px;font-weight:700;color:#111;line-height:1.4;}
-    .g-cities{display:flex;flex-wrap:wrap;justify-content:center;gap:2px 5px;font-size:9px;color:#6b7280;margin-top:6px;}
-    .g-sep{color:#d1d5db;}
-    .g-wrap{position:absolute;width:360px;height:360px;top:50%;left:50%;transform:translate(-50%,-12%);pointer-events:none;z-index:1;overflow:visible;}
-    #globeCanvas{display:block;width:360px;height:360px;border-radius:50%;mix-blend-mode:multiply;}
-    /* Skills */
-    #ss4{background:#fff;justify-content:flex-start;align-items:flex-start;padding:1.25rem;padding-top:3rem;overflow:hidden;}
-    .sk-eye{display:flex;align-items:center;justify-content:center;gap:6px;color:#0071e3;margin-bottom:0.875rem;width:100%;}
-    .sk-eye span{font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;}
-    .sk-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;width:100%;flex:1;overflow-y:auto;padding-bottom:1rem;scrollbar-width:none;}
-    .sk-grid::-webkit-scrollbar{display:none;}
-    .sk-card{position:relative;aspect-ratio:1/1;border-radius:11px;overflow:hidden;background:#e5e7eb;}
-    .sk-card img{width:100%;height:100%;object-fit:cover;transition:transform .6s ease;display:block;}
-    .sk-card:hover img{transform:scale(1.06);}
-    .sk-lbl{position:absolute;bottom:0;left:0;right:0;padding:1.5rem .5rem .45rem;background:linear-gradient(to top,rgba(0,0,0,.65),transparent);color:#fff;font-size:9px;font-weight:600;line-height:1.3;}
+    .tt-pin{position:absolute;top:4px;left:4px;background:var(--orange);color:#fff;font-size:6.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 5px;border-radius:3px;}
 
-    /* Progress dots */
-    #pdots{position:fixed;right:1.5rem;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:12px;z-index:100;opacity:0;transition:opacity 0.3s;}
-    #pdots.visible{opacity:1;}
-    @media(max-width:768px){#pdots{display:none;}}
-    .pdot{width:6px;height:6px;border-radius:50%;background:#d1d5db;transition:background .3s,transform .3s;}
-    .pdot.is-active{background:var(--orange);transform:scale(1.7);}
+    /* ═══════════════════════════════════
+       FEATURED: APPLE
+    ═══════════════════════════════════ */
+    #apple{background:var(--black);color:#fff;padding:6.5rem 2.5rem;position:relative;overflow:hidden;}
+    #apple::before{content:'';position:absolute;width:640px;height:640px;right:-200px;top:-220px;background:radial-gradient(circle,rgba(255,107,53,0.28),transparent 65%);pointer-events:none;}
+    .apple-inner{max-width:1160px;margin:0 auto;display:grid;grid-template-columns:1.05fr 0.95fr;gap:4rem;align-items:center;position:relative;}
+    .feat-kicker{display:inline-flex;align-items:center;gap:8px;font-size:0.68rem;font-weight:800;letter-spacing:0.16em;text-transform:uppercase;color:var(--orange);background:rgba(255,107,53,0.1);border:1px solid rgba(255,107,53,0.35);padding:6px 14px;border-radius:999px;margin-bottom:1.5rem;}
+    .feat-kicker .dot{width:6px;height:6px;border-radius:50%;background:var(--orange);animation:bPulse 2s infinite;}
+    .feat-h{font-family:var(--serif);font-weight:400;font-size:clamp(2.4rem,4.4vw,4rem);line-height:1.04;letter-spacing:-0.01em;margin-bottom:1.25rem;}
+    .feat-h em{font-style:italic;color:var(--orange);}
+    .feat-body{font-size:1rem;line-height:1.75;color:rgba(255,255,255,0.65);max-width:500px;margin-bottom:2rem;}
+    .feat-body strong{color:#fff;}
+    .feat-stats{display:grid;grid-template-columns:repeat(4,auto);gap:0;margin-bottom:2.25rem;border-top:1px solid rgba(255,255,255,0.12);border-bottom:1px solid rgba(255,255,255,0.12);width:fit-content;max-width:100%;}
+    .fs{padding:1.1rem 1.5rem 1.1rem 0;margin-right:1.5rem;border-right:1px solid rgba(255,255,255,0.12);}
+    .fs:last-child{border-right:none;margin-right:0;}
+    .fs b{display:block;font-family:var(--serif);font-style:italic;font-weight:400;font-size:2rem;line-height:1;color:#fff;margin-bottom:4px;}
+    .fs b em{color:var(--orange);font-style:italic;}
+    .fs span{font-size:0.66rem;font-weight:600;color:rgba(255,255,255,0.5);line-height:1.35;display:block;max-width:110px;}
+    .feat-cta{display:inline-flex;align-items:center;gap:12px;background:var(--orange);color:#fff;text-decoration:none;font-weight:800;font-size:0.95rem;padding:1rem 1.4rem 1rem 1.9rem;border-radius:999px;transition:all .25s;box-shadow:0 14px 40px rgba(255,107,53,0.35);}
+    .feat-cta .arr{width:34px;height:34px;border-radius:50%;background:#fff;color:var(--orange);display:flex;align-items:center;justify-content:center;font-size:1.1rem;transition:transform .25s;}
+    .feat-cta:hover{background:#fff;color:var(--black);transform:translateY(-3px);}
+    .feat-cta:hover .arr{background:var(--orange);color:#fff;transform:rotate(-45deg);}
+    .feat-sub{display:block;margin-top:1rem;font-size:0.75rem;color:rgba(255,255,255,0.4);}
 
-    /* Scroll hint */
-    #scrollHint{position:absolute;bottom:1.75rem;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:6px;color:#bbb;font-size:9px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;transition:opacity 0.5s;z-index:10;white-space:nowrap;}
-    #scrollHint svg{animation:sBounce 2s ease-in-out infinite;}
+    .feat-phones{position:relative;height:500px;display:block;text-decoration:none;}
+    .fphone{position:absolute;width:200px;height:410px;border-radius:32px;border:7px solid #1f1f1f;background-size:cover;background-repeat:no-repeat;box-shadow:0 30px 60px rgba(0,0,0,0.55);overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;padding:1.1rem;transition:transform .4s cubic-bezier(.22,1,.36,1);}
+    .fphone::before{content:'';position:absolute;top:10px;left:50%;transform:translateX(-50%);width:58px;height:16px;background:#000;border-radius:999px;z-index:2;}
+    .fphone::after{content:'';position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.72),transparent 50%);}
+    .fphone span{position:relative;z-index:1;font-size:0.74rem;font-weight:800;color:#fff;}
+    .fphone small{position:relative;z-index:1;font-size:0.62rem;color:rgba(255,255,255,0.7);margin-top:2px;}
+    .fp1{left:0;top:55px;transform:rotate(-8deg);background-image:url("images/apple_park.jpeg");background-position:50% 55%;background-color:#3a2a6b;}
+    .fp2{left:50%;margin-left:-100px;top:0;z-index:2;background-image:url("images/apple_theatre.jpeg");background-position:58% 50%;background-color:#e9e4de;}
+    .fp3{right:0;top:65px;transform:rotate(8deg);background-image:url("images/apple_wolfe.jpeg");background-position:15% 50%;background-color:#2b1408;align-items:flex-end;text-align:right;}
+    .feat-phones:hover .fp1{transform:rotate(-11deg) translateX(-10px);}
+    .feat-phones:hover .fp2{transform:translateY(-10px);}
+    .feat-phones:hover .fp3{transform:rotate(11deg) translateX(10px);}
 
-    /* ── ABOUT ── */
-    #about{background:var(--gray-light);padding:7rem 2.5rem;}
-    .about-inner{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:6rem;align-items:start;}
-    .about-img-frame{border-radius:20px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,0.12);}
-    .about-img-frame img{width:100%;height:520px;object-fit:cover;object-position:top;display:block;}
-    .about-kicker{font-size:0.68rem;font-weight:800;letter-spacing:0.18em;text-transform:uppercase;color:var(--orange);margin-bottom:1rem;display:block;}
-    .about-h{font-family:var(--serif);font-size:clamp(2rem,3.5vw,2.8rem);line-height:1.2;color:var(--black);margin-bottom:1.5rem;}
-    .about-h em{font-style:italic;color:var(--orange);}
-    .about-body{font-size:0.93rem;color:var(--gray);line-height:1.8;margin-bottom:1.5rem;}
-    .about-body strong{color:var(--black);font-weight:700;}
-    .chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:2rem;}
-    .chip{background:var(--orange-soft);color:var(--orange);padding:5px 13px;border-radius:999px;font-size:0.72rem;font-weight:700;}
-    .about-pills{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:2rem;}
-    .about-pill{font-size:0.75rem;font-weight:600;padding:5px 14px;border-radius:999px;border:1.5px solid rgba(0,0,0,0.1);color:var(--gray);}
-    .odivider{width:36px;height:2.5px;background:var(--orange);border-radius:2px;margin-bottom:1.5rem;}
+    /* ═══════════════════════════════════
+       NEXT STOP: SYDNEY + GLOBAL
+    ═══════════════════════════════════ */
+    #global{padding:6.5rem 2.5rem;background:#fff;}
+    .global-inner{max-width:1160px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center;}
+    .txt-kicker{font-size:0.68rem;font-weight:800;letter-spacing:0.18em;text-transform:uppercase;color:var(--orange);margin-bottom:1rem;display:flex;align-items:center;gap:10px;}
+    .txt-kicker::before{content:'';display:block;width:24px;height:2px;background:var(--orange);border-radius:1px;}
+    .txt-h{font-family:var(--serif);font-weight:400;font-size:clamp(2.2rem,3.6vw,3.4rem);line-height:1.08;letter-spacing:-0.01em;margin-bottom:1.25rem;}
+    .txt-h em{font-style:italic;color:var(--orange);}
+    .txt-body{font-size:0.97rem;color:var(--gray);line-height:1.8;max-width:480px;margin-bottom:1.75rem;}
+    .txt-body strong{color:var(--black);font-weight:700;}
+    .next-card{display:grid;grid-template-columns:auto 1fr;gap:1rem;align-items:center;background:var(--orange-soft);border:1px solid var(--orange-mid);border-radius:18px;padding:1.2rem 1.4rem;margin-bottom:1.75rem;max-width:480px;}
+    .next-ic{width:46px;height:46px;border-radius:14px;background:var(--orange);color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.3rem;}
+    .next-card small{display:block;font-size:0.62rem;font-weight:800;letter-spacing:0.16em;text-transform:uppercase;color:var(--orange);margin-bottom:3px;}
+    .next-card b{display:block;font-size:1rem;font-weight:800;}
+    .next-card span{font-size:0.82rem;color:var(--gray);}
+    .places{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:1.75rem;}
+    .place{font-size:0.75rem;font-weight:700;padding:6px 14px;border-radius:999px;background:var(--gray-light);border:1.5px solid rgba(0,0,0,0.07);}
+    .place.next{background:var(--black);color:#fff;border-color:var(--black);}
+    .global-stats{display:flex;gap:2.5rem;}
+    .global-stats b{display:block;font-family:var(--serif);font-style:italic;font-weight:400;font-size:2.4rem;line-height:1;color:var(--orange);}
+    .global-stats span{font-size:0.72rem;font-weight:600;color:var(--gray);}
+    .globe-col{display:flex;justify-content:center;}
+    #globeCanvas{width:440px;height:440px;max-width:100%;display:block;}
 
     /* ── SECTIONS ── */
     .sec-inner{max-width:1100px;margin:0 auto;}
@@ -224,7 +257,7 @@
     .pcard:hover .pcard-img{transform:scale(1.04);}
     .pcard-body{padding:1.2rem 1.5rem 1.6rem;}
     .pcard-tags{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:0.55rem;}
-    .pcard h3{font-family:var(--sans);font-size:1rem;font-weight:800;margin:0 0 0.4rem;color:var(--black);}
+    .pcard h3{font-size:1rem;font-weight:800;margin:0 0 0.4rem;}
     .pcard p{font-size:0.82rem;color:var(--gray);line-height:1.6;}
 
     /* ── CAROUSEL ── */
@@ -238,7 +271,7 @@
     .acard-img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;transition:transform 0.5s ease;}
     .acard:hover .acard-img{transform:scale(1.04);}
     .acard-body{padding:0.9rem 1.2rem 1.2rem;}
-    .acard h3{font-family:var(--sans);font-size:0.88rem;font-weight:800;margin:0 0 0.3rem;color:var(--black);}
+    .acard h3{font-size:0.88rem;font-weight:800;margin:0 0 0.3rem;}
     .acard p{font-size:0.77rem;color:var(--gray);line-height:1.5;margin:0;}
     .acard-tags{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:0.45rem;}
     .carousel-controls{display:flex;align-items:center;justify-content:center;gap:1.25rem;margin-top:2rem;}
@@ -249,8 +282,24 @@
     .cdot{width:6px;height:6px;border-radius:50%;background:#d1d5db;cursor:pointer;transition:background 0.2s,transform 0.2s;}
     .cdot.active{background:var(--orange);transform:scale(1.5);}
 
+    /* ── ABOUT ── */
+    #about{background:var(--gray-light);padding:7rem 2.5rem;}
+    .about-inner{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:6rem;align-items:start;}
+    .about-img-frame{border-radius:20px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,0.12);}
+    .about-img-frame img{width:100%;height:520px;object-fit:cover;object-position:top;display:block;}
+    .about-kicker{font-size:0.68rem;font-weight:800;letter-spacing:0.18em;text-transform:uppercase;color:var(--orange);margin-bottom:1rem;display:block;}
+    .about-h{font-family:var(--serif);font-weight:400;font-size:clamp(2rem,3.5vw,2.8rem);line-height:1.2;margin-bottom:1.5rem;}
+    .about-h em{font-style:italic;color:var(--orange);}
+    .about-body{font-size:0.93rem;color:var(--gray);line-height:1.8;margin-bottom:1.5rem;}
+    .about-body strong{color:var(--black);font-weight:700;}
+    .skill-pills{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:1.25rem;}
+    .skill-pill{font-size:0.72rem;font-weight:700;padding:5px 14px;border-radius:999px;background:var(--orange-soft);color:var(--orange);border:1.5px solid var(--orange-mid);}
+    .about-pills{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:2rem;}
+    .about-pill{font-size:0.75rem;font-weight:600;padding:5px 14px;border-radius:999px;border:1.5px solid rgba(0,0,0,0.1);color:var(--gray);}
+    .odivider{width:36px;height:2.5px;background:var(--orange);border-radius:2px;margin-bottom:1.5rem;}
+
     /* ── CONTACT ── */
-    #contact{padding:6rem 2.5rem;background:var(--gray-light);text-align:center;}
+    #contact{padding:6rem 2.5rem;background:#fff;text-align:center;}
     .contact-wrap{max-width:540px;margin:0 auto;}
     .contact-wrap h2{font-family:var(--serif);font-size:2.8rem;font-weight:400;margin-bottom:0.75rem;}
     .contact-wrap h2 em{font-style:italic;color:var(--orange);}
@@ -261,291 +310,189 @@
     footer strong{color:#888;font-weight:500;}
     :where([class^="ri-"])::before{content:"\f3c2";}
 
-    /* ═══════════════════════════════════
-       MOBILE — everything ≤ 768px
-    ═══════════════════════════════════ */
-    @media(max-width:768px){
-      /* Nav */
+    /* ═══════════ TABLET ═══════════ */
+    @media(max-width:1024px){
+      .hero-stage,.apple-inner,.global-inner{gap:2.5rem;}
+      .feat-phones{height:440px;}
+      .fphone{width:170px;height:350px;}
+      .fp2{margin-left:-85px;}
+    }
+    /* ═══════════ MOBILE ═══════════ */
+    @media(max-width:860px){
       .nav-inner{padding:0 1.25rem;}
-
-      /* Hero: disable sticky scrollytelling on mobile — show as normal stacked sections */
-      #hero-scroll{height:auto !important;}
-      #hero-sticky{
-        position:relative !important;
-        height:auto !important;
-        flex-direction:column;
-        padding-top:58px;
-        overflow:visible;
-      }
-      .hero-stage{
-        flex-direction:column;
-        gap:2rem;
-        padding:2rem 1.25rem 3rem;
-        align-items:center;
-        text-align:center;
-      }
-      .hero-text-col{
-        width:100%;
-        min-height:auto;
-        order:2; /* text below phone on mobile */
-      }
-      /* On mobile, only show the first text panel statically */
-      .txt-panel{position:relative !important;inset:auto !important;opacity:1 !important;transform:none !important;pointer-events:auto !important;}
-      /* Hide panels 2-4 on mobile */
-      #tp2,#tp3,#tp4{display:none;}
-      .hero-tag{margin:0 auto 1.5rem;}
-      .hero-h1{font-size:clamp(2.4rem,8vw,3.2rem);}
-      .hero-tagline{max-width:100%;margin-left:auto;margin-right:auto;}
+      .hero{padding:58px 1.25rem 0;min-height:auto;}
+      .hero-stage{grid-template-columns:1fr;text-align:center;padding:2.5rem 0 3.5rem;}
+      .announce,.hero-tagline{margin-left:auto;margin-right:auto;}
       .hero-btns{justify-content:center;}
-
-      .hero-phone-col{
-        width:100%;
-        order:1; /* phone above text on mobile */
-        display:flex;
-        justify-content:center;
-      }
-      /* Smaller phone on mobile */
-      .sphone-outer{
-        width:200px;height:410px;
-        border-width:8px;border-radius:1.8rem;
-      }
+      .sphone-outer{width:200px;height:410px;border-width:8px;border-radius:1.8rem;}
       .sphone-outer::before{width:80px;height:12px;}
       .sphone-screen{width:184px;height:394px;border-radius:1.5rem;}
-      /* Only show state 1 (TikTok) on mobile, hide others */
-      #ss2,#ss3,#ss4{display:none !important;}
-      #ss1{display:flex !important;opacity:1 !important;transform:none !important;filter:none !important;pointer-events:auto !important;}
-      /* Scroll hint hidden on mobile */
-      #scrollHint{display:none;}
-
-      /* About */
+      #apple,#global{padding:4.5rem 1.25rem;}
+      .apple-inner,.global-inner{grid-template-columns:1fr;}
+      .feat-phones{height:380px;max-width:400px;width:100%;margin:0 auto;order:-1;}
+      .fphone{width:150px;height:310px;border-radius:24px;border-width:5px;}
+      .fp2{margin-left:-75px;}
+      .feat-stats{grid-template-columns:repeat(2,auto);}
+      .fs:nth-child(2){border-right:none;}
+      .fs:nth-child(-n+2){border-bottom:1px solid rgba(255,255,255,0.12);}
+      .globe-col{order:-1;}
+      #globeCanvas{width:300px;height:300px;}
       #about{padding:4rem 1.25rem;}
       .about-inner{grid-template-columns:1fr;gap:2rem;}
-      .about-img-frame img{height:300px;}
-
-      /* Projects */
-      #selected-projects{padding:4rem 1.25rem;}
+      .about-img-frame img{height:320px;}
+      #selected-projects,#archive,#contact{padding:4rem 1.25rem;}
       .p2x2{grid-template-columns:1fr;}
-
-      /* Archive */
-      #archive{padding:4rem 1.25rem;}
       .acard{flex:0 0 100%;}
-
-      /* Contact */
-      #contact{padding:4rem 1.25rem;}
       .contact-wrap h2{font-size:2.2rem;}
       .sec-title{font-size:1.8rem;}
     }
-
-    /* ═══════════════════════════════════
-       SMALL MOBILE ≤ 480px
-    ═══════════════════════════════════ */
     @media(max-width:480px){
-      .hero-h1{font-size:2.2rem;}
+      .hero-h1{font-size:2.6rem;}
       .btn-fill,.btn-outline{padding:0.7rem 1.4rem;font-size:0.8rem;}
-      .sphone-outer{width:180px;height:370px;}
-      .sphone-screen{width:164px;height:354px;}
+      .feat-cta{font-size:0.85rem;padding:0.85rem 1rem 0.85rem 1.4rem;}
+      .global-stats{gap:1.5rem;}
     }
-
-    /* ═══════════════════════════════════
-       TABLET 769px – 1024px
-    ═══════════════════════════════════ */
-    @media(min-width:769px) and (max-width:1024px){
-      .hero-stage{gap:3rem;padding:0 2rem;padding-top:58px;}
-      .hero-h1{font-size:clamp(2.5rem,4vw,3.5rem);}
-      .txt-h{font-size:clamp(2rem,3vw,2.8rem);}
-      .sphone-outer{width:230px;height:472px;}
-      .sphone-outer::before{width:95px;}
-      .sphone-screen{width:208px;height:450px;}
-      .about-inner{gap:3rem;}
-      .about-img-frame img{height:400px;}
-      #selected-projects,#archive,#about,#contact{padding-left:1.5rem;padding-right:1.5rem;}
+    @media(max-width:900px) and (min-width:861px){.acard{flex:0 0 calc(50% - 0.63rem);}}
+    @media(prefers-reduced-motion:reduce){
+      .notif.is-in{animation:none;opacity:1;transform:none;}
+      .phone-float,.feat-kicker .dot{animation:none;}
+      .reveal{opacity:1;transform:none;transition:none;}
+      html.intro-on .site{transform:none;filter:none;}
     }
-
-    /* Carousel responsive */
-    @media(max-width:900px) and (min-width:769px){.acard{flex:0 0 calc(50% - 0.63rem);}}
   </style>
 </head>
 <body>
+
+<!-- ═══════════ INTRO: LOCK SCREEN ═══════════ -->
+<div class="intro" id="intro" aria-label="Intro">
+  <div class="ls-top">
+    <div class="ls-date" id="lsDate">Monday, June 21</div>
+    <div class="ls-time" id="lsTime">11:11</div>
+  </div>
+
+  <button class="notif" id="notif" aria-label="Open Beatriz's portfolio">
+    <div class="n-av">
+      <img class="face" src="images/yosemite me.jpeg" alt="">
+      <div class="n-badge"><img src="images/Design sem nome (8).png" alt=""></div>
+    </div>
+    <div>
+      <div class="n-row"><span class="n-app">Instagram</span><span class="n-time">now</span></div>
+      <div class="n-title">beatriz</div>
+      <div class="n-body">sent you her portfolio 👀 Apple's first-ever Social Strategy Intern. Tap to open.</div>
+    </div>
+  </button>
+  <div class="ls-hint" id="lsHint"><i class="ri-hand"></i> Tap the notification</div>
+
+  <div class="ls-bottom">
+    <button class="ls-skip" id="lsSkip">Skip intro</button>
+    <div class="ls-bar"></div>
+  </div>
+</div>
+
+<div class="site" id="site">
 
 <!-- NAV -->
 <nav>
   <div class="nav-inner">
     <a href="index.html" class="nav-logo">
       <img src="images/Design sem nome (8).png" alt="Logo">
-      <span class="ndot"></span>
       Beatriz Aguiar Fonseca
     </a>
     <div class="nav-links">
+      <a href="projects/apple.html" class="nav-apple">Apple experience</a>
       <a href="about.html">About</a>
       <a href="projects.html">Projects</a>
       <a href="mailto:beatrizfonseca2027@u.northwestern.edu" class="nav-cta">Say hello</a>
     </div>
-    <!-- Mobile hamburger -->
     <button class="nav-hamburger" id="navHamburger" aria-label="Menu">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
     </button>
   </div>
   <div class="nav-mobile" id="navMobile">
+    <a href="projects/apple.html" style="color:var(--orange);font-weight:800;">Apple case study ↗</a>
     <a href="about.html">About</a>
     <a href="projects.html">Projects</a>
-    <a href="mailto:beatrizfonseca2027@u.northwestern.edu" style="color:var(--orange);font-weight:800;">Say hello ↗</a>
+    <a href="mailto:beatrizfonseca2027@u.northwestern.edu">Say hello</a>
   </div>
 </nav>
 
-<!-- UNIFIED SCROLLYTELLING HERO -->
-<section id="hero-scroll">
-  <div id="hero-sticky">
-    <div class="hero-stage">
-
-      <!-- LEFT: Text panels -->
-      <div class="hero-text-col">
-
-        <div class="txt-panel is-active" id="tp1">
-          <div class="hero-tag"><span class="pulse"></span> Portfolio 2026</div>
-          <h1 class="hero-h1">Hello world!<br>I'm <em>Bea.</em></h1>
-          <div class="hero-meta">
-            <p>Junior @ Northwestern University</p>
-            <p>Incoming <strong>Social Strategist Intern @ Apple</strong></p>
-          </div>
-          <p class="hero-tagline">I make brands feel like people: <em>bold enough to be remembered,</em> strategic enough to actually work.</p>
-          <div class="hero-btns">
-            <a href="projects.html" class="btn-fill">See my work <i class="ri-arrow-right-line"></i></a>
-            <a href="about.html" class="btn-outline">About me</a>
-          </div>
-        </div>
-
-        <div class="txt-panel" id="tp2">
-          <div class="txt-kicker">What's next</div>
-          <h2 class="txt-h">Joining <em>Apple</em><br>this summer.</h2>
-          <p class="txt-body">Incoming <strong>Social Media Strategist Intern</strong> at Apple Marcom, Sunnyvale CA - Summer 2026. Working at the intersection of brand strategy and social content for one of the world's most iconic brands.</p>
-          <div class="txt-pills">
-            <span class="txt-pill orange">Apple Marcom</span>
-            <span class="txt-pill orange">Social Strategy</span>
-            <span class="txt-pill">Sunnyvale, CA</span>
-            <span class="txt-pill">Summer 2026</span>
-          </div>
-          <a href="https://linkedin.com/in/beatrizaguiarfonseca" target="_blank" class="btn-fill" style="width:fit-content">View on LinkedIn <i class="ri-arrow-right-up-line"></i></a>
-        </div>
-
-        <div class="txt-panel" id="tp3">
-          <div class="txt-kicker">Where I've been</div>
-          <h2 class="txt-h">Shaped by<br>living <em>everywhere.</em></h2>
-          <p class="txt-body">From <strong>São Paulo</strong> to Chicago, Florence, Madrid, and San Francisco, my multicultural background fuels how I think about people, brands, and creativity.</p>
-          <div class="txt-pills">
-            <span class="txt-pill">🇧🇷 São Paulo</span>
-            <span class="txt-pill">🇺🇸 Chicago</span>
-            <span class="txt-pill">🇮🇹 Florence</span>
-            <span class="txt-pill">🇺🇸 San Francisco</span>
-            <span class="txt-pill">🇪🇸 Madrid</span>
-            <span class="txt-pill">🇺🇸 Sunnyvale</span>
-          </div>
-          <a href="about.html" class="btn-outline" style="width:fit-content">My story <i class="ri-arrow-right-line"></i></a>
-        </div>
-
-        <div class="txt-panel" id="tp4">
-          <div class="txt-kicker">What I bring</div>
-          <h2 class="txt-h">Strategy meets<br><em>craft.</em></h2>
-          <p class="txt-body">My main goal is to create things that resonate and influence. I combine creative instincts with analytical thinking, from brand identity to social campaigns to full product experiences.</p>
-          <div class="txt-pills">
-            <span class="txt-pill orange">Brand Strategy</span>
-            <span class="txt-pill orange">UX/UI Design</span>
-            <span class="txt-pill orange">Social Media</span>
-            <span class="txt-pill orange">Project Mgmt</span>
-            <span class="txt-pill orange">Sales & GTM</span>
-            <span class="txt-pill orange">Leadership</span>
-          </div>
-          <div class="hero-btns">
-            <a href="projects.html" class="btn-fill">See my work <i class="ri-arrow-right-line"></i></a>
-            <a href="about.html" class="btn-outline">About me</a>
-          </div>
-        </div>
-
+<!-- ═══════════ HERO ═══════════ -->
+<header class="hero" id="hero">
+  <div class="hero-stage">
+    <div class="hero-text">
+      <h1 class="hero-h1">Hello world!<br>I'm <em>Bea.</em></h1>
+      <div class="hero-meta">
+        <p>Senior @ Northwestern University</p>
+        <p>First-ever <a href="projects/apple.html"><strong>Social Strategy Intern @ Apple</strong></a></p>
+        <p>National VP for National Communications Honor Society</p>
       </div>
+      <p class="hero-tagline">I make brands feel like people: <em>bold enough to be remembered,</em> strategic enough to actually work.</p>
+      <div class="hero-btns">
+        <a href="projects/apple.html" class="btn-fill btn-orange">See my Apple work <i class="ri-arrow-right-up-line"></i></a>
+        <a href="projects.html" class="btn-outline">All projects</a>
+      </div>
+    </div>
 
-      <!-- RIGHT: Phone -->
-      <div class="hero-phone-col">
-        <div style="position:relative;">
-          <div class="phone-glow"></div>
-          <div class="sphone-outer">
-            <div class="pb pb-v1"></div><div class="pb pb-v2"></div>
-            <div class="pb pb-v3"></div><div class="pb pb-pw"></div>
-            <div class="sphone-screen" id="sphoneScreen">
-              <div class="status-bar" id="statusBar">
-                <span>6:21</span>
-                <div class="si">
-                  <svg width="13" height="10" viewBox="0 0 15 11" fill="currentColor"><rect x="0" y="7" width="3" height="4" rx=".5"/><rect x="4" y="5" width="3" height="6" rx=".5"/><rect x="8" y="2.5" width="3" height="8.5" rx=".5"/><rect x="12" y="0" width="3" height="11" rx=".5"/></svg>
-                  <svg width="13" height="10" viewBox="0 0 24 17" fill="currentColor"><path d="M12 14.5a1.5 1.5 0 110 3 1.5 1.5 0 010-3zm0-4.5c2.2 0 4.2.9 5.6 2.4l-1.8 1.8A5.5 5.5 0 0012 12a5.5 5.5 0 00-3.8 1.5l-1.8-1.8A7.5 7.5 0 0112 10zm0-4.5c3.4 0 6.5 1.4 8.7 3.7L19 10.9A9.5 9.5 0 0012 8a9.5 9.5 0 00-7 3L3.3 9.2A11.5 11.5 0 0112 5.5zm0-4.5c4.7 0 9 1.9 12.1 5L22.3 7.7A14.5 14.5 0 0012 3.5 14.5 14.5 0 001.7 7.7L0 6A16.5 16.5 0 0112 1z"/></svg>
-                  <svg width="19" height="10" viewBox="0 0 22 12" fill="currentColor"><rect x="0" y="1" width="19" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="1.2"/><rect x="1.5" y="2.5" width="12" height="7" rx="1"/><path d="M20 4v4a2 2 0 000-4z"/></svg>
-                </div>
+    <div class="hero-phone-col">
+      <div class="phone-float">
+        <div class="phone-glow"></div>
+        <div class="sphone-outer">
+          <div class="sphone-screen">
+            <div class="status-bar">
+              <span id="sbTime">9:41</span>
+              <div class="si">
+                <svg width="13" height="10" viewBox="0 0 15 11" fill="currentColor"><rect x="0" y="7" width="3" height="4" rx=".5"/><rect x="4" y="5" width="3" height="6" rx=".5"/><rect x="8" y="2.5" width="3" height="8.5" rx=".5"/><rect x="12" y="0" width="3" height="11" rx=".5"/></svg>
+                <svg width="19" height="10" viewBox="0 0 22 12" fill="currentColor"><rect x="0" y="1" width="19" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="1.2"/><rect x="1.5" y="2.5" width="12" height="7" rx="1"/><path d="M20 4v4a2 2 0 000-4z"/></svg>
               </div>
-
-              <!-- STATE 1: TikTok -->
-              <div class="ps is-active" id="ss1">
-                <div class="tt-topbar"><i class="ri-arrow-left-line tt-icon"></i><span class="tt-handle"></span><i class="ri-more-line tt-icon"></i></div>
-                <div class="tt-prof">
-                  <div class="tt-av"><img src="images/yosemite me.jpeg" alt="Bea"></div>
-                  <div class="tt-name">Beatriz Aguiar Fonseca</div>
-                  <div class="tt-uname"></div>
-                  <div class="tt-stats">
-                    <div class="tt-stat"><div class="tt-snum">14</div><div class="tt-slbl">Projects</div></div>
-                    <div class="tt-stat"><div class="tt-snum">20M+</div><div class="tt-slbl">Impressions</div></div>
-                    <div class="tt-stat"><div class="tt-snum">∞</div><div class="tt-slbl">Dumb Jokes</div></div>
-                  </div>
-                  <button class="tt-fbtn">Follow</button>
-                </div>
-                <div class="tt-tabs"><div class="tt-tab active">Work</div><div class="tt-tab">Liked</div><div class="tt-tab">Saved</div></div>
-                <div class="tt-grid">
-                  <div class="tt-thumb"><img src="images/wingrep mockup.png" alt="WingRep"><div class="tt-tov"><span class="tt-views">↑ $600K</span></div></div>
-                  <div class="tt-thumb"><img src="images/WhatsApp Image 2025-03-26 at 04.46.12.jpeg" alt="Amazon"><div class="tt-tov"><span class="tt-views">80M users</span></div></div>
-                  <div class="tt-thumb"><img src="images/summit 5.jpeg" alt="BRASA"><div class="tt-tov"><span class="tt-views">520% ↑</span></div></div>
-                  <div class="tt-thumb"><img src="images/t4y.jpeg" alt="T4Y"><div class="tt-tov"><span class="tt-views">Upkey</span></div></div>
-                  <div class="tt-thumb"><img src="images/rfs2.png" alt="Dale Duro"><div class="tt-tov"><span class="tt-views">1K+ att.</span></div></div>
-                  <div class="tt-thumb"><img src="images/bakery 3.png" alt="Bakeries"><div class="tt-tov"><span class="tt-views">SF</span></div></div>
-                </div>
+            </div>
+            <div class="tt-topbar"><i class="ri-arrow-left-line tt-icon"></i><i class="ri-more-line tt-icon"></i></div>
+            <div class="tt-prof">
+              <div class="tt-av"><img src="images/yosemite me.jpeg" alt="Bea"></div>
+              <div class="tt-name">Beatriz Aguiar Fonseca</div>
+              <div class="tt-stats">
+                <div class="tt-stat"><div class="tt-snum">15</div><div class="tt-slbl">Projects</div></div>
+                <div class="tt-stat"><div class="tt-snum">20M+</div><div class="tt-slbl">Impressions</div></div>
+                <div class="tt-stat"><div class="tt-snum">∞</div><div class="tt-slbl">Dumb Jokes</div></div>
               </div>
-
-              <!-- STATE 2: Apple -->
-              <div class="ps" id="ss2">
-                <svg class="a-logo" viewBox="0 0 24 24" fill="currentColor" width="28" height="28"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.55-1.48 3.34-1.28 3.34-1.28.27 1.71-1.69 3-3.34 2.83"/></svg>
-                <div style="text-align:center;padding:0 1rem;"><span class="s2-tag">Incoming · Summer 2026</span><h2 class="s2-title">Social Strategy Intern</h2><p class="s2-city">Sunnyvale, CA — Apple</p><p class="s2-date">Marcom</p></div>
-                <div style="padding:0 2rem;width:100%;"><button class="s2-btn" onclick="window.open('https://linkedin.com/in/beatrizaguiarfonseca','_blank')">Check my LinkedIn ↗</button></div>
-              </div>
-
-              <!-- STATE 3: Globe -->
-              <div class="ps" id="ss3" style="justify-content:flex-start;align-items:stretch;padding:0;">
-                <div class="g-header">
-                  <div class="g-eye"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 19.2L16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg><span>Global Connection</span></div>
-                  <p class="g-title">Connecting cultures<br>across continents.</p>
-                  <div class="g-cities"><span>🇧🇷 São Paulo</span><span class="g-sep">•</span><span>🇺🇸 Chicago</span><span class="g-sep">•</span><span>🇮🇹 Florence</span><span class="g-sep">•</span><span>🇺🇸 San Francisco</span><span class="g-sep">•</span><span>🇪🇸 Madrid</span><span class="g-sep">•</span><span>🇺🇸 Sunnyvale</span></div>
-                </div>
-                <div class="g-wrap"><canvas id="globeCanvas"></canvas></div>
-              </div>
-
-              <!-- STATE 4: Skills -->
-              <div class="ps" id="ss4" style="justify-content:flex-start;align-items:flex-start;padding:1.25rem;padding-top:3rem;overflow:hidden;">
-                <div class="sk-eye"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5z"/><path d="M19 1l.75 2.25L22 4l-2.25.75L19 7l-.75-2.25L16 4l2.25-.75z"/><path d="M5 17l.5 1.5L7 19l-1.5.5L5 21l-.5-1.5L3 19l1.5-.5z"/></svg><span>Marketing Expertise</span></div>
-                <div class="sk-grid">
-                  <div class="sk-card"><img src="https://images.unsplash.com/photo-1680986070892-1b64bfe03338?w=400&q=80" alt="Brand" loading="lazy"><div class="sk-lbl">Brand Strategy</div></div>
-                  <div class="sk-card"><img src="https://images.unsplash.com/photo-1760008486577-21baa8b560a5?w=400&q=80" alt="UX" loading="lazy"><div class="sk-lbl">UX/UI Design</div></div>
-                  <div class="sk-card"><img src="https://images.unsplash.com/photo-1663153205426-2b93a5a8dca9?w=400&q=80" alt="Social" loading="lazy"><div class="sk-lbl">Social Media</div></div>
-                  <div class="sk-card"><img src="https://images.unsplash.com/photo-1758876202468-5ffe0ee61f07?w=400&q=80" alt="PM" loading="lazy"><div class="sk-lbl">Project Mgmt</div></div>
-                  <div class="sk-card"><img src="https://images.unsplash.com/photo-1758691736097-7f735ac5f118?w=400&q=80" alt="GTM" loading="lazy"><div class="sk-lbl">Sales & GTM</div></div>
-                  <div class="sk-card"><img src="https://images.unsplash.com/photo-1630068846062-3ffe78aa5049?w=400&q=80" alt="Lead" loading="lazy"><div class="sk-lbl">Leadership</div></div>
-                </div>
-              </div>
-
+              <a href="projects/apple.html" class="tt-fbtn">Follow</a>
+            </div>
+            <div class="tt-tabs"><div class="tt-tab active">Work</div><div class="tt-tab">Liked</div><div class="tt-tab">Saved</div></div>
+            <div class="tt-grid">
+              <a href="projects/apple.html" class="tt-thumb"><img src="images/apple park.jpeg" alt="Apple"><span class="tt-pin">Pinned</span><div class="tt-tov"><span class="tt-views">Apple · 600 ppl</span></div></a>
+              <a href="projects/wingrep.html" class="tt-thumb"><img src="images/wingrep mockup.png" alt="WingRep"><div class="tt-tov"><span class="tt-views">↑ $600K</span></div></a>
+              <a href="projects/amazon-music.html" class="tt-thumb"><img src="images/WhatsApp Image 2025-03-26 at 04.46.12.jpeg" alt="Amazon"><div class="tt-tov"><span class="tt-views">80M users</span></div></a>
+              <a href="projects/brasa-summit.html" class="tt-thumb"><img src="images/summit 5.jpeg" alt="BRASA"><div class="tt-tov"><span class="tt-views">520% ↑</span></div></a>
+              <a href="projects/there4you.html" class="tt-thumb"><img src="images/t4y.jpeg" alt="T4Y"><div class="tt-tov"><span class="tt-views">Upkey</span></div></a>
+              <a href="projects/dale-duro.html" class="tt-thumb"><img src="images/rfs2.png" alt="Dale Duro"><div class="tt-tov"><span class="tt-views">1K+ att.</span></div></a>
             </div>
           </div>
         </div>
       </div>
+    </div>
+  </div>
+</header>
 
-    </div><!-- /hero-stage -->
-
-    <div id="scrollHint"><span>Keep scrolling</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></div>
+<!-- ═══════════ FEATURED: APPLE ═══════════ -->
+<section id="apple">
+  <div class="apple-inner">
+    <div class="reveal">
+      <h2 class="feat-h"> Summer 2026:  <em>Social Strategy</em> at Apple.</h2>
+      <p class="feat-body">Twelve weeks on the <strong>Worldwide Marketing Communications</strong> team in Sunnyvale. I worked on short-form vertical content, #ShotOniPhone, the iPhone 18 Pro Max launch, Gen Z insights, and the social team's first AI-powered workflow tools.</p>
+      <div class="feat-stats">
+        <div class="fs"><b><em>2,000+</em></b><span>videos &amp; campaigns audited</span></div>
+        <div class="fs"><b>~600</b><span>people in my workshop</span></div>
+        <div class="fs"><b><em>20+</em></b><span>designers I led on strategy</span></div>
+        <div class="fs"><b>6M</b><span>likes on the top launch post I worked on</span></div>
+      </div>
+      <a href="projects/apple.html" class="feat-cta">Get to know my work<span class="arr"><i class="ri-arrow-right-line"></i></span></a>
+    </div>
+    <a href="projects/apple.html" class="feat-phones reveal" aria-label="Open the Apple case study">
+      <div class="fphone fp1" role="img" aria-label="Beatriz at Apple Park"><span>Apple Park</span><small>Cupertino, CA</small></div>
+      <div class="fphone fp2" role="img" aria-label="Beatriz in the Steve Jobs Theater"><span>Steve Jobs Theater</span><small>Apple Park</small></div>
+      <div class="fphone fp3" role="img" aria-label="Beatriz at Wolfe 3 in Sunnyvale"><span>Wolfe 3</span><small>Home base · Sunnyvale</small></div>
+    </a>
   </div>
 </section>
-
-<div id="pdots"><div class="pdot is-active"></div><div class="pdot"></div><div class="pdot"></div><div class="pdot"></div></div>
 
 <!-- SELECTED PROJECTS -->
 <section id="selected-projects">
@@ -579,9 +526,9 @@
       <a href="projects/brnd.html" class="acard"><div class="acard-iw"><img class="acard-img" src="images/Beatriz's Portfolio.pdf.png" alt="BRND" loading="lazy"></div><div class="acard-body"><div class="acard-tags"><span class="tag">Communications</span><span class="tag">Social Media</span></div><h3>Brazilian Debate Association</h3><p>Social media and communications lead for national debate league.</p></div></a>
     </div></div>
     <div class="carousel-controls">
-      <button class="carousel-btn" id="carouselPrev"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
+      <button class="carousel-btn" id="carouselPrev" aria-label="Previous"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
       <div class="carousel-dots" id="carouselDots"></div>
-      <button class="carousel-btn" id="carouselNext"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>
+      <button class="carousel-btn" id="carouselNext" aria-label="Next"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>
     </div></div>
   </div>
 </section>
@@ -589,12 +536,13 @@
 <!-- ABOUT -->
 <section id="about">
   <div class="about-inner">
-    <div><div class="about-img-frame"><img src="images/yosemite me.jpeg" alt="Beatriz Fonseca"></div></div>
-    <div>
+    <div class="reveal"><div class="about-img-frame"><img src="images/yosemite me.jpeg" alt="Beatriz Fonseca"></div></div>
+    <div class="reveal">
       <div class="odivider"></div>
       <span class="about-kicker">Nice to meet you!</span>
-      <h2 class="about-h">I'm a creative and bold<br>strategist & <em>builder.</em></h2>
-      <p class="about-body">From <strong>São Paulo</strong>, now between Chicago and SF. I'm a multidisciplinary marketer studying <strong>Communication Studies & Psychology</strong> at Northwestern University, with certificates in Design and Integrated Marketing Communications.</p>
+      <h2 class="about-h">I'm a creative and bold<br>strategist &amp; <em>builder.</em></h2>
+      <p class="about-body">From <strong>São Paulo</strong>, now between Chicago and SF. I'm a multidisciplinary marketer studying <strong>Communication Studies &amp; Psychology</strong> at Northwestern University, with certificates in Design and Integrated Marketing Communications. I combine creative instinct with analytical thinking, from brand identity to social campaigns to full product experiences.</p>
+      <div class="skill-pills"><span class="skill-pill">Brand Strategy</span><span class="skill-pill">Social Strategy</span><span class="skill-pill">Creative Strategy</span><span class="skill-pill">UX/UI Design</span><span class="skill-pill">Sales &amp; GTM</span><span class="skill-pill">AI Workflows</span><span class="skill-pill">Leadership</span></div>
       <div class="about-pills"><span class="about-pill">☕ hot-chocolate-fueled</span><span class="about-pill">🌎 cultural-exchange-enthusiast</span><span class="about-pill">🎶 music-obsessed</span><span class="about-pill">🎨 design nerd</span><span class="about-pill">📊 data-driven</span></div>
       <div style="display:flex;gap:1rem;flex-wrap:wrap;"><a href="about.html" class="btn-fill">About Me <i class="ri-arrow-right-line"></i></a><a href="mailto:beatrizfonseca2027@u.northwestern.edu" class="btn-outline">Say hello</a></div>
     </div>
@@ -603,89 +551,99 @@
 
 <!-- CONTACT -->
 <section id="contact">
-  <div class="contact-wrap">
+  <div class="contact-wrap reveal">
     <div class="odivider" style="margin:0 auto 1.5rem;"></div>
     <h2>Let's work <em>together</em></h2>
     <p>Always open to cool projects, internships, and good conversations. Let's connect.</p>
-    <div class="contact-btns"><a href="mailto:beatrizfonseca2027@u.northwestern.edu" class="btn-fill"><i class="ri-mail-line"></i> Email me</a><a href="https://linkedin.com/in/beatrizaguiarfonseca" target="_blank" class="btn-outline"><i class="ri-linkedin-line"></i> LinkedIn</a></div>
+    <div class="contact-btns"><a href="mailto:beatrizfonseca2027@u.northwestern.edu" class="btn-fill"><i class="ri-mail-line"></i> Email me</a><a href="https://linkedin.com/in/beatrizaguiarfonseca" target="_blank" rel="noopener" class="btn-outline"><i class="ri-linkedin-line"></i> LinkedIn</a></div>
   </div>
 </section>
 
 <footer><p><strong>Beatriz Aguiar Fonseca</strong> · Built with ♥ in Evanston &amp; SF · <a href="mailto:beatrizfonseca2027@u.northwestern.edu">beatrizfonseca2027@u.northwestern.edu</a></p></footer>
 
+</div><!-- /site -->
+
 <script>
+// ── LIVE CLOCK (lock screen + phone status bar) ──
+(function(){
+  function tick(){
+    const d=new Date();
+    const t=d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}).replace(/\s?[AP]M/i,'');
+    const day=d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+    const lt=document.getElementById('lsTime'),ld=document.getElementById('lsDate'),sb=document.getElementById('sbTime');
+    if(lt)lt.textContent=t; if(ld)ld.textContent=day; if(sb)sb.textContent=t;
+  }
+  tick(); setInterval(tick,15000);
+})();
+
+// ── INTRO: notification drop → tap → "app launch" into the site ──
+(function(){
+  const root=document.documentElement;
+  const site=document.getElementById('site');
+  const intro=document.getElementById('intro');
+  const notif=document.getElementById('notif');
+  const hint=document.getElementById('lsHint');
+  const reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function markReady(){document.body.classList.add('ready');}
+  if(!root.classList.contains('intro-on')){markReady();return;}
+
+  setTimeout(function(){notif.classList.add('is-in');},reduce?0:1100);
+  setTimeout(function(){hint.classList.add('show');},reduce?0:2300);
+
+  let opened=false;
+  function openSite(fromNotif){
+    if(opened)return; opened=true;
+    try{sessionStorage.setItem('bea_intro_seen','1');}catch(e){}
+    const finish=function(){
+      site.classList.add('revealing');
+      root.classList.remove('intro-on');
+      markReady();
+      setTimeout(function(){intro.remove();},600);
+    };
+    if(reduce||!fromNotif){
+      intro.classList.add('is-leaving');
+      finish();
+      return;
+    }
+    // App-launch: an orange panel grows out of the notification to fill the screen, then fades away
+    const r=notif.getBoundingClientRect();
+    const l=document.createElement('div');
+    l.className='launch';
+    l.style.top=r.top+'px';l.style.left=r.left+'px';l.style.width=r.width+'px';l.style.height=r.height+'px';
+    document.body.appendChild(l);
+    requestAnimationFrame(function(){requestAnimationFrame(function(){l.classList.add('full');});});
+    setTimeout(function(){
+      intro.style.display='none';
+      finish();
+      l.classList.add('fade');
+      setTimeout(function(){l.remove();},500);
+    },520);
+  }
+  notif.addEventListener('click',function(){openSite(true);});
+  document.getElementById('lsSkip').addEventListener('click',function(){openSite(false);});
+  document.addEventListener('keydown',function(e){
+    if(!opened&&(e.key==='Enter'||e.key===' '||e.key==='Escape')){e.preventDefault();openSite(e.key!=='Escape');}
+  });
+})();
+
 // ── MOBILE NAV ──
 document.getElementById('navHamburger').addEventListener('click',function(){
   document.getElementById('navMobile').classList.toggle('open');
 });
 document.addEventListener('click',function(e){
   const nav=document.getElementById('navMobile');
-  if(!nav.contains(e.target)&&!document.getElementById('navHamburger').contains(e.target)){
-    nav.classList.remove('open');
-  }
+  if(!nav.contains(e.target)&&!document.getElementById('navHamburger').contains(e.target)){nav.classList.remove('open');}
 });
 
-// ── UNIFIED SCROLLYTELLING (desktop only) ──
+// ── SCROLL REVEAL ──
 (function(){
-  // Disable on mobile
-  if(window.innerWidth<=768)return;
-
-  const section=document.getElementById('hero-scroll');
-  const phoneIds=['ss1','ss2','ss3','ss4'];
-  const textIds=['tp1','tp2','tp3','tp4'];
-  const dots=document.querySelectorAll('.pdot');
-  const pdotsEl=document.getElementById('pdots');
-  const hint=document.getElementById('scrollHint');
-  const statusBar=document.getElementById('statusBar');
-  let current=0;
-
-  function activate(idx){
-    if(idx===current)return;
-    phoneIds.forEach((id,i)=>{const el=document.getElementById(id);if(i===idx){el.classList.remove('is-exit');el.classList.add('is-active');}else if(i<idx){el.classList.remove('is-active');el.classList.add('is-exit');}else{el.classList.remove('is-active','is-exit');}});
-    textIds.forEach((id,i)=>{const el=document.getElementById(id);if(i===idx){el.classList.remove('is-exit');el.classList.add('is-active');}else if(i<idx){el.classList.remove('is-active');el.classList.add('is-exit');}else{el.classList.remove('is-active','is-exit');}});
-    dots.forEach((d,i)=>d.classList.toggle('is-active',i===idx));
-    statusBar.style.color=idx===0?'#fff':'#000';
-    if(hint)hint.style.opacity=idx<phoneIds.length-1?'1':'0';
-    current=idx;
-  }
-  function onScroll(){
-    const rect=section.getBoundingClientRect();
-    const totalScroll=section.offsetHeight-window.innerHeight;
-    const scrolled=-rect.top;
-    const progress=Math.max(0,Math.min(1,scrolled/totalScroll));
-    const idx=Math.min(phoneIds.length-1,Math.floor(progress*phoneIds.length));
-    const inZone=scrolled>-window.innerHeight*0.5&&scrolled<totalScroll+window.innerHeight*0.5;
-    pdotsEl.classList.toggle('visible',inZone);
-    activate(idx);
-  }
-  window.addEventListener('scroll',onScroll,{passive:true});
-  pdotsEl.classList.add('visible');
-  activate(0);
+  const io=new IntersectionObserver(function(entries){
+    entries.forEach(function(en){if(en.isIntersecting){en.target.classList.add('in');io.unobserve(en.target);}});
+  },{threshold:0.1});
+  document.querySelectorAll('.reveal').forEach(function(el){io.observe(el);});
 })();
 
-// ── GLOBE ──
-(function(){
-  const canvas=document.getElementById('globeCanvas');
-  if(!canvas)return;
-  const ctx=canvas.getContext('2d');
-  const W=360,H=360,R=160;
-  canvas.width=W;canvas.height=H;
-  const cities=[{lat:-23.5,lon:-46.6,label:'São Paulo'},{lat:41.8,lon:-87.6,label:'Chicago'},{lat:43.7,lon:11.2,label:'Florence'},{lat:37.7,lon:-122.4,label:'San Francisco'},{lat:40.4,lon:-3.7,label:'Madrid'}];
-  function project(lat,lon,rot){const phi=(90-lat)*Math.PI/180,theta=(lon+rot)*Math.PI/180;const x=R*Math.sin(phi)*Math.cos(theta),y=R*Math.cos(phi),z=R*Math.sin(phi)*Math.sin(theta);return{x:W/2+x,y:H/2-y,z};}
-  let rot=0;
-  function draw(){
-    ctx.clearRect(0,0,W,H);
-    const grd=ctx.createRadialGradient(W/2-30,H/2-30,6,W/2,H/2,R);
-    grd.addColorStop(0,'#fff9f6');grd.addColorStop(1,'#ffe8dc');
-    ctx.beginPath();ctx.arc(W/2,H/2,R,0,Math.PI*2);ctx.fillStyle=grd;ctx.fill();
-    ctx.strokeStyle='rgba(255,107,53,0.14)';ctx.lineWidth=0.7;
-    for(let lat=-60;lat<=60;lat+=30){ctx.beginPath();for(let lon=-180;lon<=180;lon+=5){const p=project(lat,lon,rot);if(p.z>=0){lon===-180?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y);}}ctx.stroke();}
-    for(let lon=0;lon<360;lon+=30){ctx.beginPath();for(let lat=-90;lat<=90;lat+=5){const p=project(lat,lon,rot);if(p.z>=0){lat===-90?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y);}}ctx.stroke();}
-    cities.forEach(c=>{const p=project(c.lat,c.lon,rot);if(p.z<0)return;ctx.beginPath();ctx.arc(p.x,p.y,4.5,0,Math.PI*2);ctx.fillStyle='#FF6B35';ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.stroke();ctx.fillStyle='rgba(13,13,13,0.75)';ctx.font='bold 8px Plus Jakarta Sans, sans-serif';ctx.fillText(c.label,p.x+7,p.y+3);});
-    rot+=0.14;requestAnimationFrame(draw);
-  }
-  draw();
-})();
 
 // ── CAROUSEL ──
 (function(){
@@ -696,7 +654,7 @@ document.addEventListener('click',function(e){
   if(!track)return;
   const cards=track.querySelectorAll('.acard');
   let perPage=3,page=0;
-  function calcPer(){const w=window.innerWidth;if(w<=768)return 1;if(w<900)return 2;return 3;}
+  function calcPer(){const w=window.innerWidth;if(w<=860)return 1;if(w<900)return 2;return 3;}
   function totalPages(){return Math.ceil(cards.length/perPage);}
   function buildDots(){dotsWrap.innerHTML='';for(let i=0;i<totalPages();i++){const d=document.createElement('div');d.className='cdot'+(i===page?' active':'');d.addEventListener('click',()=>goTo(i));dotsWrap.appendChild(d);}}
   function goTo(p){page=Math.max(0,Math.min(p,totalPages()-1));const gap=20,cw=cards[0].offsetWidth+gap;track.style.transform=`translateX(-${page*perPage*cw}px)`;buildDots();prevBtn.disabled=page===0;nextBtn.disabled=page>=totalPages()-1;}
